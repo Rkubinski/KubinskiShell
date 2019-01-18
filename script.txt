@@ -1,0 +1,10 @@
+set x 10 
+print x
+help
+set y 7
+print y
+set y 3
+print y
+print z
+get
+quit
