@@ -7,7 +7,7 @@
 #include "memorymanager.h"
 
 PCB *head,*tail;
-//missing : Data structure instantiation 
+FILE *ram[10];
 
 void clearRAM()
 	{
@@ -69,6 +69,30 @@ PCB* findBeforeFirst()
 		return tmp;
 
 	}
+
+void updateVictimTable(PCB*p,int frame)
+	{
+		PCB *tmp=tail;
+		while (tmp->next !=NULL)
+			{
+				if (tmp!=p)		//if it is not the same as the PCB that is stealing the victim's spot
+					{
+					for (int i=0;i<10;i++)		//then we loop thru pagetable, checking which page has the frame we are victimizing
+						{
+						if (tmp->pageTable[i]==frame)
+							{
+								tmp->pageTable[i]=-1;		//not sure if making NULL is the right approach
+								break;
+							}			
+						}
+					}
+			tmp=tmp->next;
+
+			}
+	
+
+	}
+
 int numberNodes()
 	{int c=1;
 

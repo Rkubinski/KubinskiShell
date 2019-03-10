@@ -6,7 +6,7 @@ kernel.o: kernel.c ram.h pcb.h shell.h cpu.h kernel.h
 	gcc -c kernel.c 
 memorymanager.o: memorymanager.c memorymanager.h kernel.h pcb.h
 	gcc -c memorymanager.c
-pcb.o: pcb.c pcb.h
+pcb.o: pcb.c pcb.h memorymanager.h
 	gcc -c pcb.c
 cpu.o: cpu.c cpu.h shell.h
 	gcc -c cpu.c

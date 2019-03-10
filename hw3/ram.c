@@ -1,6 +1,6 @@
 #include <stdio.h>
+#include "kernel.h"
 
-FILE *ram[10];
 
 int findTop()
 	{int top=0;

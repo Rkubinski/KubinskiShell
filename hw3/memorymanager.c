@@ -39,7 +39,7 @@ int countTotalPages(FILE *f)
 		{
   		counter++;
 		}
-
+	fseek(f, 0, SEEK_SET);
 	counter=ceil(counter/4);
 	return counter;
 
@@ -73,26 +73,61 @@ int findFrame(FILE*page)
 	return idx;
 
 	}
+int inPageTable(PCB *p,int n)
+	{int idx=-1;
+		for (int i=0;i<10;i++)
+			{
+				//if (p->pageTable[i]==n)
+				//	{idx=i;}
 
-int findVictim(PCB *p)
+			}
+	return idx;		
+	}
+int generateRandom()
 	{
 	int n;
 	srand(time(NULL));
 	n = rand() % 10;
- 	//remember to check if in PCB
+ 	
+	return n;
+	}
 
+int findVictim(PCB *p)
+	{
+	int n = generateRandom();
+ 	
+ 	//while the pageTable has a frame at index n, we keep generating a new number
+	while (inPageTable(p,n)>0)
+		{
+			n=(n+1)%10;
+
+		}
 
 	return n;
 	}
 
 int updateFrame(int frameNumber, int victimFrame, FILE *page)
 	{
-
+	if (frameNumber==-1)
+		{ram[victimFrame]=page;}
+	else ram[frameNumber]=page;
 
 	}
 
+
+
+		
+
+
 int updatePageTable(PCB *p, int pageNumber, int frameNumber, int victimFrame)
 	{
-
+	if (frameNumber==-1)
+		{p->pageTable[pageNumber]=victimFrame;
+		updateVictimTable(p, victimFrame);
+		}
+	else 
+	 	{
+	 	p->pageTable[pageNumber]=frameNumber;
+	 	}
 
 	}

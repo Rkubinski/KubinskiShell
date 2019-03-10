@@ -53,7 +53,7 @@ void shell()
 		printf("$");
 		
 
-
+		memset(command,0,1000);
 		fgets(command,1000,stdin);
 		
 		errorcode=parseinput(command);
