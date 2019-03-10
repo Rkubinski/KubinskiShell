@@ -1,0 +1,4 @@
+set x 2 
+print x
+set x 2
+print x
