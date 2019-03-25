@@ -1,0 +1,7 @@
+exec asgt3test4.txt asgt3test1.txt
+exec asgt3test1.txt asgt3test4.txt
+exec asgt3test1.txt asgt3test2.txt asgt3test3.txt
+exec asgt3test2.txt asgt3test1.txt 
+exec asgt3test3.txt asgt3test1.txt
+exec
+exec asgt3test2.txt asgt3test2.txt

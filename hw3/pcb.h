@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+
 typedef struct pcb
 	{FILE*PC;
 	struct pcb *next;
@@ -8,3 +9,5 @@ typedef struct pcb
 	} PCB;
 
 PCB* makePCB(FILE *f);
+
+void initStruct(PCB* p);

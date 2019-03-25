@@ -1,0 +1,44 @@
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x
+set x 4
+print x

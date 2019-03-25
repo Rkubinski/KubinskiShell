@@ -2,7 +2,7 @@
 
 
 
-void addToRAM(FILE *f);
+
 
 void removeFILEPT(FILE *f);
 
