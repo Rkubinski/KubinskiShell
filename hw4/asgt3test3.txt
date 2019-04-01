@@ -1,0 +1,20 @@
+set x 3
+print x
+set x 3
+print x
+set x 3
+print x
+set x 3
+print x
+set x 3
+print x
+set x 3
+print x
+set x 3
+print x
+set x 3
+print x
+set x 3
+print x
+set x 3
+print x
