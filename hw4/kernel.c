@@ -7,6 +7,10 @@
 	#include "memorymanager.h"
 	#include <string.h>
 	#include <unistd.h>
+	#include "IOSCHEDULER.h"
+	#include "DISK_driver.h"
+	#include "shellmemory.h"
+
 
 	PCB *head,*tail;
 	FILE *ram[10];
@@ -29,8 +33,6 @@
 	{
 		clearRAM();
 		prepBackStore();
-
-
 	}
 
 	void addToReady(PCB* p)
@@ -239,7 +241,9 @@ void scheduler()
 			c.IP=findPage(head->PC_page,tmp);	//copy the pointer incremented to the right location to the CPU IP pointer
 			
 			c.offset=head->PC_offset;			//copy the offset from the PCB
+
 			Flag=run(c.quanta);					//runs for 2 instructions
+
 			fseek(head->PC, 0, SEEK_SET); 		// we bring back the file pointer
 			//if not at end of file 
 
@@ -291,8 +295,9 @@ void scheduler()
 					head->next=NULL;
 					}
 				
-				//printf("test\n");
+				
 				}																//if we have 3 pages originally, only first 2 will be in RAM
+
 			else 
 				{
 
@@ -302,7 +307,72 @@ void scheduler()
 		}
 	}
 
+char* parseWriteData(char * comm[],int size)
+	{	
+		char ret [1000]="";
+		int idx=0;
+		for (int i=2 ; i< size; i++)
+			{
 
+				char * tmp=comm[i];
+				
+				for (int j=0;j<strlen(tmp);j++)
+					{
+						if (tmp[j]!='\0' &&tmp[j]!=']' && tmp[j]!='[')
+							{
+							ret[idx]=tmp[j];
+							idx++;
+							}
+					}
+				if (i != size-1)	//if not the last word
+					{
+						ret[idx]=' ';
+						idx++;
+					}
+			}
+	char *r ;
+	r=ret;
+	
+	return r;
+	}
+
+void fileIO(char *command[], int size)
+		{
+
+		updateActiveFile(command[1]);
+
+
+		
+		if (strcmp(command[0],"read")==0)
+			{
+			enqueue(head,"",0);
+			char *ptr= IOscheduler("",head,0);
+			dequeue();
+			insert(command[2],ptr);
+
+			}
+		else if (strcmp(command[0],"write")==0)
+			{
+			enqueue(head,parseWriteData(command,size),0);
+			IOscheduler(parseWriteData(command,size),head,1);
+			dequeue();
+			}
+
+
+
+		else if (strcmp(command[0],"mount")==0)
+			{	enqueue(head,"",0);
+				mountPartition(command);
+				dequeue();
+			}
+		
+		}
+	
+void kernelTakeOver(char * command[], int size)
+	{	
+		fileIO(command,size);
+	}
+		
 
 
 
@@ -315,7 +385,8 @@ void scheduler()
 
 		boot();
 		printf("Kernel 1.0 loaded!\n");
-
+		initIO();
 		shell();
 	//instantiate all data structures
-	}
+	}		
+

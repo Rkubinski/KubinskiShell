@@ -6,8 +6,11 @@
 
 
 
+
 struct CPU c={.quanta=2,
 			 .offset=0};
+
+
 
 int isExecuting()
 	{
@@ -45,8 +48,9 @@ int run (int quanta)
 
 			if(fgets(command, sizeof(command), c.IP)!=NULL &&strcmp(command,"")!=10)		//we check if strcmp is 10 because that means its only a new line
 				{	
-					
+									
 					parseinput(command);
+					
 					
 					memset(command, 0, 255);
 					c.offset++;

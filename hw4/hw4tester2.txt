@@ -1,0 +1,5 @@
+mount D 20 2
+write output.txt [jon ate]
+read output.txt x
+print x
+

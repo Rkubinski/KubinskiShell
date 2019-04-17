@@ -24,75 +24,54 @@ int quit() {return -1;}
 
 
 
-
 void exec(char*command[], int args)
 	{//checking for repeated args
-		
-		
-
-		for (int i = 1; i<args;i++)
-		{
-
+	int errcode;
+	for (int i = 1; i<args;i++)
+	{
 		//check if input is valid
-			FILE *f=fopen(command[i],"r");
-			if (f==NULL)
-				{printf("ERROR. %s not found.\n",command[i]);
-			return;}
-			else fclose(f);
-		}
-		
-		int errcode;
-		for (int i= 1; i<args;i++)
+		FILE *f=fopen(command[i],"r");
+		if (f==NULL)
+			{printf("ERROR. %s not found.\n",command[i]);
+		return;}
+		else fclose(f);
+	}
+	for (int i= 1; i<args;i++)
 		{
 		FILE *f = fopen(command[i],"r");
 		errcode=launcher(f);
 
 		if (errcode==0)
 			{printf("ERROR in launcher\n");}
-	
-		
-
 		}
-		
+	
 
 
-
-		scheduler();
-		
-		
-		
+	scheduler();
 	}	
 
 
-
-
-
-
 void runscript (char * script)
-{FILE *f = fopen(script,"r");
-if (f==NULL) 
-	{printf("Invalid file\n");
-return;
-}	
-char line[256];
+	{
+	FILE *f = fopen(script,"r");
+	if (f==NULL) 
+		{printf("Invalid file\n");
+		return;
+		}	
+	char line[256];
 
-while(fgets(line,sizeof(line),f))
-{
-	parseinput(line);
-}
-
-
-fclose(f);
-
-}
+	while(fgets(line,sizeof(line),f))
+	{
+		parseinput(line);
+	}
+	fclose(f);
+	}
 
 
 
 int isCommand(char *command[], int args)
 {
-	
-	
-	if (strcmp(command[0],"help")==0 || strcmp(command[0],"quit")==0)
+	if (strcmp(command[0],"help")==0 || strcmp(command[0],"quit")==0 || strcmp(command[0],"mount")==0 || strcmp(command[0],"read")==0 || strcmp(command[0],"write")==0)
 		{return 0;}
 	else if(strcmp(command[0],"print")==0 || strcmp(command[0],"run")==0)
 	{
@@ -147,9 +126,6 @@ int interpreter(char * command[], int argcount)
 	else if (commCheck==2)
 		{return errCode;}
 
-
-
-
 	if (strcmp("help",command[0])==0)
 	{
 		help();
@@ -180,6 +156,13 @@ int interpreter(char * command[], int argcount)
 		exec(command,argcount);
 
 	}
+
+	if (strcmp("read",command[0])==0||strcmp("write",command[0])==0||strcmp("mount",command[0])==0)
+		{
+			
+			kernelTakeOver(command, argcount);}
+
+	
 
 	//we reset the array after we are done interpreting.
 	for (int i=0;i<argcount;i++)
