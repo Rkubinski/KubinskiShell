@@ -4,6 +4,9 @@
 #include <dirent.h>
 #include <errno.h>
 #include "interpreter.h"
+#include "pcb.h"
+#include "IOSCHEDULER.h"
+
 
 //PARTITION is private but global
 struct PARTITION
@@ -119,6 +122,7 @@ int searchMap(int fatLocation)
 
 int partition(char *name,int totalblocks, int blocksize)
 	{	
+
 		DIR* dir = opendir("PARTITION");
 		if (dir)
 		{
@@ -142,7 +146,7 @@ int partition(char *name,int totalblocks, int blocksize)
 		system(newfile);
 		
 		currentPartition = fopen(path,"w");
-
+			if (currentPartition==NULL) return 0;
 
 		fprintf(currentPartition, "%d\n", totalblocks);
 		fprintf(currentPartition, "%d\n", blocksize);
@@ -168,6 +172,7 @@ int partition(char *name,int totalblocks, int blocksize)
 		
 		
 		fclose(currentPartition);
+		return 1;
 		
 	}
 
@@ -177,31 +182,18 @@ int mount(char *name)
 		strcat(r,"PARTITION/");
 		strcat(r,name);
 		strcat(r,".txt");
-
-		
 		currentPartition=fopen(r,"r+");
-
+		if (currentPartition==NULL) return 0;
 		strcpy(partitionName,name);
-		
-		
 		int total_blocks=0;							
 		int block_size=0;
-		
 		fscanf (currentPartition, "%d", &total_blocks);				//MAKE SURE TO STORE THESE INTO THE GLOBAL PARTITION
-			
-		
-		
 		part.total_blocks=total_blocks;
-
 		fscanf (currentPartition, "%d", &block_size);
-
 		part.block_size=block_size;
-		
 		for (int i =0; i<20;i++)
 			{
-
 			fscanf(currentPartition,"%s ",fat[i].filename);	
-
 			fscanf(currentPartition,"%d ",&fat[i].file_length);	
 			for (int j=0;j<10;j++)
 				{
@@ -211,30 +203,8 @@ int mount(char *name)
 			}
 		fseek(currentPartition,0,SEEK_SET);
 		block_buffer=calloc(1,part.block_size);					// we malloc in mount because we dont always have the chance to in partition e.g: partition already exists
-		
 		printf("Partition %s mounted.\n",name);
-		/*
-		printf("total blocks: %d block_size: %d\n",part.total_blocks,part.block_size);
-		printf("------------FAT---------\n");
-
-		for (int i=0;i<20;i++)
-			{	
-				
-				printf("FAT index %d:\n",i);
-				
-				//printf("filename: %s\n",fat[i+1].filename);
-				printf("file_length:  %d\n",fat[i].file_length);
-			}
-		printf("------------DATA---------\n");
-		for (int i=0;i<total_blocks;i++)
-			{	int val;
-				fscanf (currentPartition, "%d", &val);
-				printf("data index %d: %d\n",i, val);
-
-			}
-
-		printf("Block buffer: %s\n",block_buffer);
-		*/
+		return 1;
 	}
 int findFpTop()
 	{
@@ -247,98 +217,36 @@ int findFpTop()
 		}
 	return idx;
 	}
-void printPartition()
-	{
-		printf("total blocks: %d block_size: %d\n",part.total_blocks,part.block_size);
-		printf("------------FAT---------\n");
-
-		for (int i=0;i<20;i++)
-			{	
-				
-				printf("FAT index %d:\n",i);
-					
-				//printf("filename: %s\n",fat[i+1].filename);
-				printf("file_length:  %d\n",fat[i].file_length);
-					for (int j=0;j<10;j++)
-						{printf("blockPTR index; %d value: %d\n",j,fat[i].blockPtrs[j]);}
-			}
-		int offset= sizeof(part.total_blocks)+sizeof(part.block_size)+20*sizeof(struct FAT);
-		 
-		 fseek(currentPartition,offset,SEEK_SET);
-		printf("------------DATA---------\n");
-		for (int i=0;i<part.total_blocks*part.block_size;i+=part.block_size)
-			{	char val=' ';
-				printf("data index %d:",i);
-				for (int j=0;j<part.block_size;j++)
-					{
-						fscanf (currentPartition, "%c", &val);
-						printf("%c", val);
-
-					}
-				printf("\n");
-				
-
-			}
-
-	}
-
-
 
 
 int openfile(char*name)
 	{
-		//printf("name of inputted file: %s\n",name );
-	/*
-	printf("OPENING FILE FUNCTION \n");
-	
-	printf("------------FAT---------\n");
-
-		for (int i=0;i<20;i++)
-			{	
-				
-				printf("FAT index %d:\n",i);
-				
-				printf("filename: %s\n",fat[i].filename);
-				printf("file_length:  %d\n",fat[i].file_length);
-			}
-	
-	*/
 	int fatLocation=-1;
 	for (int i=0;i<20;i++)
-		{	
-			//if the file is in FAT
+		{													//if the file is in FAT
 			if (fat[i].file_length>0)
-
 				{
-				if (strcmp(fat[i].filename,name)==0)
-					{//printf("name of fat file: %s\n",fat[i].filename);
-					//if file is in fat, then it is also in the map and the fp
-
-					fatLocation=i;
-					break;
-					}
-				
+			if (strcmp(fat[i].filename,name)==0)
+				{
+														//if file is in fat, then it is also in the map and the fp
+				fatLocation=i;
+				break;
 				}
+			}
 		}
-	//if file is not in FAT
-
 	if (fatLocation==-1)
-		{		//printf("filename not found in FAT\n");
-				fatLocation=findFatTop();
-		
+		{		fatLocation=findFatTop();
 				if (fatLocation==-1)
 					{
 					printf("No more space in FAT\n");
-					return 0;
+					return -1;
 					}
 				else {
-					
 					int map_index=findMapTop();	//this assumes that if theres an fp index, then theres a map index
-					//printf("Top of the map: %d\n",map_index);
 					if (map_index== -1)					//FP is all filled up, no space in the map
 						{
 						printf("ERROR, no more spots in the fp[]\n");
-						return 0;
+						return -1;
 						}
 
 					else 
@@ -346,14 +254,14 @@ int openfile(char*name)
 						int fp_index=findFpTop();
 						if (fp_index == -1)				//no spots in the fp 
 							{printf("ERROR, no more spots in the fp[]\n");
-							return 0;
+							return -1;
 							}
 						//spot in fp and spot in map
 						else
 							{
 
 							FILE *f = fopen(name,"w+");	//open file for reading OR writing, file is created if it doesnt exist
-							//printf("File pointer we are opening in openfile(): %p\n",f);
+						
 							
 							fp[fp_index]=f;
 
@@ -361,9 +269,6 @@ int openfile(char*name)
 							map[map_index].fat_index=fatLocation;
 							fat[fatLocation].filename=(char *)calloc(strlen(name)+1,sizeof(char));	//allocating the space needed
 							strcpy(fat[fatLocation].filename,name);
-							
-							//printf("file added to FAT: %s\n",fat[fatLocation].filename);
-							
 						}
 					
 					}
@@ -376,21 +281,7 @@ int openfile(char*name)
 							
 		}
 	
-	//printf("File opening completed\n");
-	/*
-	printf("------------FAT---------\n");
 
-		for (int i=0;i<20;i++)
-			{	
-				
-				printf("FAT index %d:\n",i);
-				
-				printf("filename: %s\n",fat[i].filename);
-				printf("file_length:  %d\n",fat[i].file_length);
-			}
-		
-	*/
-	//printf("FAT index selected: %d\n",fatLocation);
 
 	return fatLocation;
 	}
@@ -400,36 +291,6 @@ char *returnBlock()
 	return block_buffer;
 }
 
-int readBlock(int file)
-	{
-	FILE *f = fp[map[searchMap(file)].fp_index];
-	if (f==NULL)			//if the file is not open
-		{
-			f=fopen(fat[file].filename,"a+");
-			fat[file].current_location=0;
-		}
-	char output[part.block_size+1];
-	int location= fat[file].blockPtrs[fat[file].current_location];
-	if (location == -1)	
-		{
-			location= currentPartitionLocation;
-		}
-	
-	for (int i=0;i<part.block_size;i++)
-		{
-
-		output[i]=DATA[i+currentPartitionLocation];
-		
-		}
-	output[part.block_size]='\0';
-
-	strcpy(block_buffer,output);
-	printf("Read operation terminated\n");
-	}
-
-
-
-//save partition to file without including data
 void writePartition(char data[])
 	{	
 	fseek(currentPartition,0,SEEK_SET);		//position at beginning of file
@@ -456,6 +317,39 @@ void writePartition(char data[])
 		}
 
 	}
+
+int readBlock(int file)
+	{
+	FILE *f = fp[map[searchMap(file)].fp_index];
+	if (f==NULL)			//if the file is not open
+		{
+			f=fopen(fat[file].filename,"a+");
+			fat[file].current_location=0;
+		}
+	char output[part.block_size+1];
+	int location= fat[file].blockPtrs[fat[file].current_location];
+	if (location == -1)	
+		{
+			location= currentPartitionLocation;
+		}
+	
+	for (int i=0;i<part.block_size;i++)
+		{
+
+		output[i]=DATA[i+currentPartitionLocation];
+		
+		}
+	fat[file].current_location++;
+	writePartition(DATA);
+	output[part.block_size]='\0';
+
+	strcpy(block_buffer,output);
+	printf("Read operation terminated\n");
+	}
+
+
+
+
 
 
 int writeBlock(int file,char *data)

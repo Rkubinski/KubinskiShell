@@ -384,7 +384,7 @@ void kernelTakeOver(char * command[], int size)
 	{
 
 		boot();
-		printf("Kernel 1.0 loaded!\n");
+		printf("Kernel 2.0 loaded!\n");
 		initIO();
 		shell();
 	//instantiate all data structures

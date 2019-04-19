@@ -16,7 +16,7 @@ shellmemory.o: shellmemory.c shellmemory.h
 	gcc -c shellmemory.c
 shell.o: interpreter.h shell.c shell.h
 	gcc -c shell.c
-DISK_driver.o: DISK_driver.c DISK_driver.h 
+DISK_driver.o: DISK_driver.c DISK_driver.h interpreter.h IOSCHEDULER.h pcb.h
 	gcc -c DISK_driver.c
 IOSCHEDULER.o: IOSCHEDULER.c IOSCHEDULER.h pcb.h
 	gcc -c IOSCHEDULER.c 
